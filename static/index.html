@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldPost — AI Social Platform</title>
+    <meta name="description" content="AI-powered social media platform with real-time spam moderation">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- ── Sidebar ────────────────────────────────────────── -->
+        <aside class="sidebar">
+            <a href="/" class="sidebar-brand">
+                <span class="brand-icon">🛡️</span>
+                <span class="brand-text">ShieldPost</span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item active">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Feed</span>
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="document.getElementById('postImage').click(); return false;">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-label">Create</span>
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <span class="nav-icon">🔔</span>
+                    <span class="nav-label">Activity</span>
+                    <span class="nav-badge" id="spamBadge" style="display:none">0</span>
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar">M</div>
+                <div class="user-info">
+                    <div class="user-name">Moderator</div>
+                    <div class="user-role">AI Admin</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── Main Content ───────────────────────────────────── -->
+        <main class="main-content">
+            <div class="feed-layout">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>Feed</h1>
+                    <p>Share moments, powered by AI moderation</p>
+                </div>
+
+                <!-- Composer -->
+                <div class="composer" id="composer">
+                    <div class="composer-header">
+                        <div class="avatar">✦</div>
+                        <input type="text" id="postAuthor" placeholder="Your name" autocomplete="off" value="Anonymous">
+                    </div>
+                    <div class="composer-body">
+                        <textarea id="postCaption" placeholder="What's on your mind?" rows="1"
+                            oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
+                    </div>
+                    <div class="composer-preview">
+                        <img id="imagePreview" alt="Preview">
+                    </div>
+                    <div class="composer-footer">
+                        <div class="composer-actions">
+                            <label class="composer-action-btn" title="Add photo">
+                                📷
+                                <input type="file" id="postImage" accept="image/*">
+                            </label>
+                            <span class="file-name-display" id="fileName"></span>
+                        </div>
+                        <button class="btn btn-primary" id="postBtn" onclick="createPost()">
+                            Post
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Posts Feed -->
+                <div id="postsContainer">
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">📸</div>
+                        <h3>No posts yet</h3>
+                        <p>Upload an image and share it with the world.</p>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav">
+        <a href="/" class="active">🏠</a>
+        <a href="/dashboard">📊</a>
+        <a href="#" onclick="document.getElementById('postImage').click(); return false;">➕</a>
+        <a href="/dashboard">🔔</a>
+        <a href="/dashboard">⚙️</a>
+    </nav>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
