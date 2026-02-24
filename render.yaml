@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: shieldpost
+    runtime: python
+    buildCommand: "pip install -r requirements.txt && bash build.sh"
+    startCommand: "gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: NLTK_DATA
+        value: "/opt/render/project/src/nltk_data"
+    plan: free
