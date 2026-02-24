@@ -16,7 +16,11 @@ from backend.preprocessing import preprocess_text
 
 router = APIRouter(prefix="/api")
 
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "uploads")
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+if os.environ.get("VERCEL"):
+    UPLOAD_DIR = "/tmp/uploads"
+else:
+    UPLOAD_DIR = os.path.join(_PROJECT_ROOT, "static", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 

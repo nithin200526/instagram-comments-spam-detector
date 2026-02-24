@@ -27,7 +27,13 @@ from sklearn.metrics import classification_report
 from backend.preprocessing import preprocess_text, extract_nlp_features, NLP_FEATURE_NAMES
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+
+# Use /tmp on Vercel (serverless), local models/ dir otherwise
+if os.environ.get("VERCEL"):
+    MODELS_DIR = "/tmp/models"
+else:
+    MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+
 MODEL_PATH = os.path.join(MODELS_DIR, "spam_classifier.joblib")
 VECTORIZER_PATH = os.path.join(MODELS_DIR, "tfidf_vectorizer.joblib")
 SCALER_PATH = os.path.join(MODELS_DIR, "nlp_scaler.joblib")

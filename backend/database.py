@@ -7,7 +7,13 @@ import sqlite3
 import os
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "platform.db")
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+
+# Use /tmp on Vercel (serverless), local data/ dir otherwise
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/platform.db"
+else:
+    DB_PATH = os.path.join(_PROJECT_ROOT, "data", "platform.db")
 
 
 def get_connection():
