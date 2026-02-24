@@ -215,18 +215,104 @@ def train_model():
 # ─── Loading ──────────────────────────────────────────────────────────────────
 
 def load_model():
-    """Load model from disk, or train if not found."""
+    """Load model from disk, or train if not found. Falls back to built-in data."""
     global _model, _vectorizer, _scaler
+
+    os.makedirs(MODELS_DIR, exist_ok=True)
+
+    print(f"   MODEL_PATH: {MODEL_PATH}")
+    print(f"   VECTORIZER_PATH: {VECTORIZER_PATH}")
+    print(f"   SCALER_PATH: {SCALER_PATH}")
+    print(f"   Files exist: model={os.path.exists(MODEL_PATH)} vec={os.path.exists(VECTORIZER_PATH)} scl={os.path.exists(SCALER_PATH)}")
 
     if all(os.path.exists(p) for p in [MODEL_PATH, VECTORIZER_PATH, SCALER_PATH]):
         print("   Loading existing NLP model...")
-        _model = joblib.load(MODEL_PATH)
-        _vectorizer = joblib.load(VECTORIZER_PATH)
-        _scaler = joblib.load(SCALER_PATH)
-    else:
-        _model, _vectorizer, _scaler = train_model()
+        try:
+            _model = joblib.load(MODEL_PATH)
+            _vectorizer = joblib.load(VECTORIZER_PATH)
+            _scaler = joblib.load(SCALER_PATH)
+            print("   Model loaded successfully")
+            return
+        except Exception as e:
+            print(f"   Failed to load model files: {e}")
+            print("   Will retrain...")
 
-    print("   Model ready")
+    # Try training from datasets
+    try:
+        _model, _vectorizer, _scaler = train_model()
+        return
+    except Exception as e:
+        print(f"   Training from datasets failed: {e}")
+        print("   Building fallback model from built-in data...")
+
+    # ─── Fallback: train on built-in example data ────────────────────────
+    _build_fallback_model()
+    print("   Fallback model ready")
+
+
+def _build_fallback_model():
+    """Train a simple model from hardcoded spam/ham examples when no datasets are available."""
+    global _model, _vectorizer, _scaler
+
+    spam_examples = [
+        "Free iPhone giveaway click here now", "Subscribe to my channel for free stuff",
+        "Check out my profile link in bio", "Make $5000 per day working from home",
+        "Click the link below to win prizes", "Follow me and I'll follow you back guaranteed",
+        "Buy cheap followers and likes here", "Visit my website for amazing deals",
+        "Hot singles in your area click now", "Congratulations you have won a gift card",
+        "Free subscribers check my channel", "I gained 10k followers using this trick",
+        "Want free money click this link", "Best deals and discounts available now",
+        "You won't believe this secret method", "DM me for free products and giveaways",
+        "Earn money online no experience needed", "Get rich quick with this simple trick",
+        "Limited time offer don't miss out", "Amazing opportunity just for you click now",
+        "Check out this amazing product", "Subscribe for daily free gifts",
+        "Get unlimited likes and follows free", "Win a brand new car enter now",
+        "Make easy money from home today", "Free trial no credit card needed click",
+        "Lose weight fast with this pill", "Bitcoin investment double your money",
+        "Cheap pharmacy online best prices", "Casino bonus free spins click here",
+    ]
+    ham_examples = [
+        "Great video I really enjoyed it", "This is so helpful thank you",
+        "I love this content keep it up", "Can you make more videos like this",
+        "What camera do you use for filming", "The editing in this video is amazing",
+        "I learned so much from this tutorial", "Your music taste is incredible",
+        "This recipe looks delicious going to try it", "Happy birthday hope you have a great day",
+        "The sunset in this photo is beautiful", "I agree with your point completely",
+        "This is exactly what I was looking for", "Your dog is so cute what breed is it",
+        "Thanks for sharing your experience", "I had a similar situation happen to me",
+        "Love the color combination in this outfit", "This place looks amazing where is it",
+        "Good luck on your exam tomorrow", "The weather has been so nice lately",
+        "I just finished reading that book too", "Your garden looks beautiful this spring",
+        "Happy anniversary to you both", "That concert must have been incredible",
+        "This workout routine is really effective", "I appreciate your honest review",
+        "The architecture in this city is stunning", "Great job on the presentation today",
+        "Looking forward to the next episode", "This is really well explained thanks",
+    ]
+
+    texts = spam_examples + ham_examples
+    labels = [1] * len(spam_examples) + [0] * len(ham_examples)
+
+    cleaned = [preprocess_text(t) for t in texts]
+
+    _vectorizer = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), sublinear_tf=True)
+    X_tfidf = _vectorizer.fit_transform(cleaned)
+
+    nlp_feats = [extract_nlp_features(t) for t in texts]
+    nlp_matrix = np.array([[f[k] for k in NLP_FEATURE_NAMES] for f in nlp_feats], dtype=np.float64)
+    _scaler = StandardScaler()
+    nlp_scaled = _scaler.fit_transform(nlp_matrix)
+
+    X = hstack([X_tfidf, csr_matrix(nlp_scaled)])
+    y = np.array(labels)
+
+    _model = LogisticRegression(max_iter=1000, C=1.0, random_state=42)
+    _model.fit(X, y)
+
+    # Save for next cold start
+    joblib.dump(_model, MODEL_PATH)
+    joblib.dump(_vectorizer, VECTORIZER_PATH)
+    joblib.dump(_scaler, SCALER_PATH)
+    print(f"   Fallback model saved to {MODELS_DIR}")
 
 
 def retrain_model():
