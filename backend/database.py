@@ -1,6 +1,6 @@
 """
 SQLite database layer for the social media platform.
-Tables: posts, comments
+Tables: posts, comments, likes
 """
 
 import sqlite3
@@ -31,6 +31,8 @@ def init_db():
             image_url TEXT NOT NULL,
             caption TEXT DEFAULT '',
             author TEXT DEFAULT 'Anonymous',
+            likes INTEGER DEFAULT 0,
+            saved INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -45,14 +47,29 @@ def init_db():
             confidence REAL DEFAULT 0.0,
             spam_probability REAL DEFAULT 0.0,
             is_hidden INTEGER DEFAULT 0,
+            likes INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
         )
     """)
 
+    # Migrate existing tables: add new columns if missing
+    try:
+        cursor.execute("ALTER TABLE posts ADD COLUMN likes INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE posts ADD COLUMN saved INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE comments ADD COLUMN likes INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+
     conn.commit()
     conn.close()
-    print("✅ Database initialized")
+    print("  Database initialized")
 
 
 # ─── Posts ────────────────────────────────────────────────────────────────────
@@ -80,6 +97,54 @@ def get_posts() -> list:
 
 def get_post(post_id: int) -> dict | None:
     conn = get_connection()
+    row = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def delete_post(post_id: int) -> bool:
+    conn = get_connection()
+    row = conn.execute("SELECT image_url FROM posts WHERE id = ?", (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        return False
+    conn.execute("DELETE FROM comments WHERE post_id = ?", (post_id,))
+    conn.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+    conn.commit()
+    conn.close()
+    # Try to delete image file
+    if row[0]:
+        img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), row[0].lstrip("/"))
+        if os.path.exists(img_path):
+            try:
+                os.remove(img_path)
+            except OSError:
+                pass
+    return True
+
+
+def like_post(post_id: int) -> dict | None:
+    conn = get_connection()
+    conn.execute("UPDATE posts SET likes = likes + 1 WHERE id = ?", (post_id,))
+    conn.commit()
+    row = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def unlike_post(post_id: int) -> dict | None:
+    conn = get_connection()
+    conn.execute("UPDATE posts SET likes = MAX(0, likes - 1) WHERE id = ?", (post_id,))
+    conn.commit()
+    row = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def save_post(post_id: int) -> dict | None:
+    conn = get_connection()
+    conn.execute("UPDATE posts SET saved = 1 - saved WHERE id = ?", (post_id,))
+    conn.commit()
     row = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
     conn.close()
     return dict(row) if row else None
@@ -143,6 +208,27 @@ def hide_comment(comment_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def delete_comment(comment_id: int) -> bool:
+    conn = get_connection()
+    row = conn.execute("SELECT id FROM comments WHERE id = ?", (comment_id,)).fetchone()
+    if not row:
+        conn.close()
+        return False
+    conn.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def like_comment(comment_id: int) -> dict | None:
+    conn = get_connection()
+    conn.execute("UPDATE comments SET likes = likes + 1 WHERE id = ?", (comment_id,))
+    conn.commit()
+    row = conn.execute("SELECT * FROM comments WHERE id = ?", (comment_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 # ─── Analytics ────────────────────────────────────────────────────────────────
 
 def get_analytics() -> dict:
@@ -151,18 +237,21 @@ def get_analytics() -> dict:
     spam = conn.execute("SELECT COUNT(*) FROM comments WHERE is_spam = 1").fetchone()[0]
     legit = total - spam
     hidden = conn.execute("SELECT COUNT(*) FROM comments WHERE is_hidden = 1").fetchone()[0]
+    approved = conn.execute("SELECT COUNT(*) FROM comments WHERE is_hidden = 0 AND is_spam = 1").fetchone()[0]
+    total_posts = conn.execute("SELECT COUNT(*) FROM posts").fetchone()[0]
+    total_likes = conn.execute("SELECT COALESCE(SUM(likes), 0) FROM posts").fetchone()[0]
 
-    # Confidence distribution
-    confidences = conn.execute(
-        "SELECT spam_probability FROM comments"
-    ).fetchall()
+    confidences = conn.execute("SELECT spam_probability FROM comments").fetchall()
     confidence_list = [r[0] for r in confidences]
 
-    # Spam comment texts for keyword extraction
-    spam_texts = conn.execute(
-        "SELECT text FROM comments WHERE is_spam = 1"
-    ).fetchall()
+    spam_texts = conn.execute("SELECT text FROM comments WHERE is_spam = 1").fetchall()
     spam_text_list = [r[0] for r in spam_texts]
+
+    # Recent moderation activity
+    recent = conn.execute(
+        "SELECT author, text, is_spam, spam_probability, is_hidden, created_at FROM comments ORDER BY created_at DESC LIMIT 20"
+    ).fetchall()
+    recent_list = [dict(r) for r in recent]
 
     conn.close()
 
@@ -171,7 +260,11 @@ def get_analytics() -> dict:
         "spam": spam,
         "legit": legit,
         "hidden": hidden,
+        "approved_spam": approved,
+        "total_posts": total_posts,
+        "total_likes": total_likes,
         "spam_percentage": round((spam / total * 100) if total > 0 else 0, 1),
         "confidences": confidence_list,
         "spam_texts": spam_text_list,
+        "recent_activity": recent_list,
     }

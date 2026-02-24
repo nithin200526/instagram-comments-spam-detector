@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShieldPost — Analytics Dashboard</title>
-    <meta name="description" content="AI spam moderation analytics dashboard">
+    <meta name="description" content="AI spam moderation analytics and settings">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <link rel="stylesheet" href="/static/styles.css">
@@ -14,147 +14,134 @@
 
 <body>
 
-    <div class="app-layout">
+    <div class="app">
 
-        <!-- ── Sidebar ────────────────────────────────────────── -->
+        <!-- ═══ Sidebar ═══════════════════════════════════════════ -->
         <aside class="sidebar">
-            <a href="/" class="sidebar-brand">
-                <span class="brand-icon">🛡️</span>
-                <span class="brand-text">ShieldPost</span>
+            <a href="/" class="brand">
+                <span class="brand-logo">🛡️</span>
+                <span class="brand-name">ShieldPost</span>
             </a>
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-label">Feed</span>
+            <nav class="nav">
+                <a href="/" class="nav-link">
+                    <span class="icon">🏠</span><span class="label">Feed</span>
                 </a>
-                <a href="/dashboard" class="nav-item active">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">Dashboard</span>
+                <a href="/dashboard" class="nav-link active">
+                    <span class="icon">📊</span><span class="label">Analytics</span>
                 </a>
-                <a href="/" class="nav-item">
-                    <span class="nav-icon">➕</span>
-                    <span class="nav-label">Create</span>
+                <a href="/" class="nav-link">
+                    <span class="icon">➕</span><span class="label">Create</span>
                 </a>
-                <a href="/dashboard" class="nav-item">
-                    <span class="nav-icon">🔔</span>
-                    <span class="nav-label">Activity</span>
+                <a href="/dashboard" class="nav-link">
+                    <span class="icon">🔔</span><span class="label">Activity</span>
                 </a>
-                <a href="/dashboard" class="nav-item">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Settings</span>
+                <a href="/dashboard" class="nav-link">
+                    <span class="icon">⚙️</span><span class="label">Settings</span>
                 </a>
             </nav>
-            <div class="sidebar-footer">
-                <div class="user-avatar">M</div>
-                <div class="user-info">
-                    <div class="user-name">Moderator</div>
-                    <div class="user-role">AI Admin</div>
+            <div class="profile-card">
+                <div class="profile-avatar">M</div>
+                <div>
+                    <div class="profile-name">Moderator</div>
+                    <div class="profile-role">AI Admin</div>
                 </div>
             </div>
         </aside>
 
-        <!-- ── Main Content ───────────────────────────────────── -->
-        <main class="main-content">
-            <div class="dashboard-layout">
+        <!-- ═══ Main ══════════════════════════════════════════════ -->
+        <main class="main">
+            <div class="dash-container">
 
-                <div class="page-header">
-                    <h1>Moderation Dashboard</h1>
-                    <p>Real-time analytics for AI spam detection</p>
+                <div class="page-title">
+                    <h1>📊 Moderation Dashboard</h1>
+                    <p>Real-time AI spam detection analytics &amp; settings</p>
                 </div>
 
-                <!-- Stats Row -->
-                <div class="stats-row">
-                    <div class="stat-card accent">
-                        <div class="stat-header">
-                            <div class="stat-icon">💬</div>
-                        </div>
-                        <div class="stat-value" id="statTotal">0</div>
-                        <div class="stat-label">Total Comments</div>
+                <!-- Stats Grid (6 cards) -->
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat s-accent">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-val" id="stTotal">0</div>
+                        <div class="stat-lbl">Total Comments</div>
                     </div>
-                    <div class="stat-card danger">
-                        <div class="stat-header">
-                            <div class="stat-icon">🚫</div>
-                        </div>
-                        <div class="stat-value" id="statSpam">0</div>
-                        <div class="stat-label">Spam Detected</div>
+                    <div class="stat s-red">
+                        <div class="stat-icon">🚫</div>
+                        <div class="stat-val" id="stSpam">0</div>
+                        <div class="stat-lbl">Spam Detected</div>
                     </div>
-                    <div class="stat-card success">
-                        <div class="stat-header">
-                            <div class="stat-icon">✅</div>
-                        </div>
-                        <div class="stat-value" id="statLegit">0</div>
-                        <div class="stat-label">Legitimate</div>
+                    <div class="stat s-green">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-val" id="stLegit">0</div>
+                        <div class="stat-lbl">Legitimate</div>
                     </div>
-                    <div class="stat-card info">
-                        <div class="stat-header">
-                            <div class="stat-icon">📈</div>
-                        </div>
-                        <div class="stat-value" id="statPercent">0%</div>
-                        <div class="stat-label">Spam Rate</div>
+                    <div class="stat s-blue">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-val" id="stRate">0%</div>
+                        <div class="stat-lbl">Spam Rate</div>
+                    </div>
+                    <div class="stat s-yellow">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-val" id="stPosts">0</div>
+                        <div class="stat-lbl">Total Posts</div>
+                    </div>
+                    <div class="stat s-purple">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-val" id="stLikes">0</div>
+                        <div class="stat-lbl">Total Likes</div>
                     </div>
                 </div>
 
                 <!-- Threshold Settings -->
-                <div class="settings-card">
+                <div class="settings-box">
                     <h3>⚙️ Auto-Hide Threshold</h3>
-                    <p class="settings-desc">Comments with spam probability above this value are automatically hidden.
+                    <p class="desc">Comments with spam probability above this value are automatically hidden by the AI.
                     </p>
-                    <div class="threshold-control">
-                        <span class="label-text">Lenient</span>
-                        <input type="range" class="threshold-slider" id="thresholdSlider" min="0.1" max="0.99"
-                            step="0.01" value="0.5">
-                        <span class="label-text">Strict</span>
-                        <span class="threshold-value" id="thresholdValue">50%</span>
-                        <button class="btn btn-primary btn-sm" id="saveThresholdBtn">Save</button>
+                    <div class="threshold-row">
+                        <span class="t-label">Lenient</span>
+                        <input type="range" class="threshold-slider" id="thSlider" min="0.1" max="0.99" step="0.01"
+                            value="0.5">
+                        <span class="t-label">Strict</span>
+                        <span class="t-value" id="thValue">50%</span>
+                        <button class="btn btn-primary btn-sm" id="thSaveBtn">Save</button>
                     </div>
                 </div>
 
-                <!-- Charts -->
-                <div class="charts-row">
-                    <div class="chart-card">
-                        <div class="chart-card-header">
-                            <h3>🥧 Spam vs Legitimate</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="pieChart"></canvas>
-                        </div>
+                <!-- Charts: 2-column -->
+                <div class="chart-grid">
+                    <div class="chart-box">
+                        <h3>🥧 Spam vs Legitimate</h3>
+                        <div class="chart-area"><canvas id="pieChart"></canvas></div>
                     </div>
-                    <div class="chart-card">
-                        <div class="chart-card-header">
-                            <h3>🔑 Top Spam Keywords</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="keywordsChart"></canvas>
-                        </div>
+                    <div class="chart-box">
+                        <h3>🔑 Top Spam Keywords</h3>
+                        <div class="chart-area"><canvas id="kwChart"></canvas></div>
                     </div>
                 </div>
 
-                <div class="charts-row">
-                    <div class="chart-card full-width">
-                        <div class="chart-card-header">
-                            <h3>📈 Confidence Distribution</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="confidenceChart"></canvas>
-                        </div>
+                <!-- Confidence Histogram -->
+                <div class="chart-grid">
+                    <div class="chart-box full">
+                        <h3>📈 Confidence Distribution</h3>
+                        <div class="chart-area"><canvas id="confChart"></canvas></div>
                     </div>
                 </div>
 
-                <!-- Empty State -->
-                <div class="empty-state" id="dashboardEmpty" style="display: none;">
-                    <div class="empty-icon">📊</div>
-                    <h3>No data yet</h3>
-                    <p>Go to the <a href="/" style="color: var(--accent);">Feed</a> and add some comments to see
-                        analytics.</p>
+                <!-- Activity Log -->
+                <div class="activity-box">
+                    <h3>🕑 Recent Moderation Activity</h3>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty" style="padding:24px">
+                            <p>No activity yet</p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </main>
-
     </div>
 
-    <!-- Mobile Bottom Nav -->
-    <nav class="mobile-nav">
+    <!-- Mobile Nav -->
+    <nav class="mob-nav">
         <a href="/">🏠</a>
         <a href="/dashboard" class="active">📊</a>
         <a href="/">➕</a>
@@ -162,202 +149,175 @@
         <a href="/dashboard">⚙️</a>
     </nav>
 
+    <!-- Toasts -->
+    <div class="toasts" id="toasts"></div>
+
     <script>
         const API = '';
-        let pieChart, keywordsChart, confidenceChart;
+        let pieChart, kwChart, confChart;
 
-        // ── Threshold ─────────────────────────────────────────────
-        async function loadThreshold() {
-            try {
-                const res = await fetch(`${API}/api/settings`);
-                const data = await res.json();
-                document.getElementById('thresholdSlider').value = data.threshold;
-                document.getElementById('thresholdValue').textContent = Math.round(data.threshold * 100) + '%';
-            } catch (e) { }
-        }
-
-        document.getElementById('thresholdSlider').addEventListener('input', e => {
-            document.getElementById('thresholdValue').textContent = Math.round(e.target.value * 100) + '%';
-        });
-
-        document.getElementById('saveThresholdBtn').addEventListener('click', async () => {
-            const val = parseFloat(document.getElementById('thresholdSlider').value);
-            try {
-                await fetch(`${API}/api/settings/threshold`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ threshold: val }),
-                });
-                showToast('Threshold updated', 'success');
-            } catch (e) {
-                showToast('Failed to update', 'error');
-            }
-        });
-
-        function showToast(msg, type = 'info') {
+        // ── Toast ─────────────────────────────────────────────
+        function toast(msg, type = 'info') {
             const el = document.createElement('div');
             el.className = `toast toast-${type}`;
             el.textContent = msg;
-            document.body.appendChild(Object.assign(document.createElement('div'), {
-                innerHTML: `<div class="toast-container" style="position:fixed;top:20px;right:20px;z-index:10000"><div class="toast toast-${type}">${msg}</div></div>`
-            })).remove;
-            const container = document.createElement('div');
-            container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;';
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            document.body.appendChild(container);
-            setTimeout(() => container.remove(), 3000);
+            document.getElementById('toasts').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
 
-        // ── Dashboard Data ────────────────────────────────────────
-        async function loadDashboard() {
+        // ── Threshold ─────────────────────────────────────────
+        async function loadThreshold() {
             try {
-                const res = await fetch(`${API}/api/analytics`);
-                const data = await res.json();
-
-                if (data.total === 0) {
-                    document.getElementById('dashboardEmpty').style.display = 'block';
-                    return;
-                }
-                document.getElementById('dashboardEmpty').style.display = 'none';
-
-                // Animate stat counters
-                animateValue('statTotal', data.total);
-                animateValue('statSpam', data.spam);
-                animateValue('statLegit', data.legit);
-                document.getElementById('statPercent').textContent = data.spam_percentage + '%';
-
-                renderPieChart(data.spam, data.legit);
-                renderKeywordsChart(data.top_keywords);
-                renderConfidenceChart(data.confidences);
-            } catch (e) {
-                console.error('Dashboard error:', e);
-            }
+                const r = await fetch(`${API}/api/settings`);
+                const d = await r.json();
+                document.getElementById('thSlider').value = d.threshold;
+                document.getElementById('thValue').textContent = Math.round(d.threshold * 100) + '%';
+            } catch (e) { }
         }
 
-        function animateValue(id, end) {
+        document.getElementById('thSlider').addEventListener('input', e => {
+            document.getElementById('thValue').textContent = Math.round(e.target.value * 100) + '%';
+        });
+
+        document.getElementById('thSaveBtn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API}/api/settings/threshold`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ threshold: parseFloat(document.getElementById('thSlider').value) }),
+                });
+                toast('Threshold updated', 'ok');
+            } catch (e) { toast('Failed to update', 'err'); }
+        });
+
+        // ── Dashboard Data ────────────────────────────────────
+        async function loadDash() {
+            try {
+                const r = await fetch(`${API}/api/analytics`);
+                const d = await r.json();
+
+                animVal('stTotal', d.total);
+                animVal('stSpam', d.spam);
+                animVal('stLegit', d.legit);
+                animVal('stPosts', d.total_posts || 0);
+                animVal('stLikes', d.total_likes || 0);
+                document.getElementById('stRate').textContent = d.spam_percentage + '%';
+
+                renderPie(d.spam, d.legit);
+                renderKW(d.top_keywords);
+                renderConf(d.confidences);
+                renderActivity(d.recent_activity || []);
+            } catch (e) { console.error('Dash error:', e); }
+        }
+
+        function animVal(id, end) {
             const el = document.getElementById(id);
             const start = parseInt(el.textContent) || 0;
             if (start === end) return;
-            const duration = 600;
-            const startTime = performance.now();
-            function update(now) {
-                const progress = Math.min((now - startTime) / duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3);
+            const t0 = performance.now();
+            (function tick(now) {
+                const p = Math.min((now - t0) / 600, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
                 el.textContent = Math.round(start + (end - start) * ease);
-                if (progress < 1) requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
+                if (p < 1) requestAnimationFrame(tick);
+            })(t0);
         }
 
-        function chartColors() {
-            return {
-                text: '#a0a0a0',
-                grid: 'rgba(255,255,255,0.04)',
-                font: { family: 'Inter' },
-            };
-        }
+        const cConf = () => ({ text: '#a0a0a0', grid: 'rgba(255,255,255,0.04)', font: { family: 'Inter' } });
 
-        function renderPieChart(spam, legit) {
-            const ctx = document.getElementById('pieChart').getContext('2d');
+        function renderPie(spam, legit) {
+            const ctx = document.getElementById('pieChart');
             if (pieChart) pieChart.destroy();
-            const c = chartColors();
+            const c = cConf();
             pieChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Spam', 'Legitimate'],
                     datasets: [{
                         data: [spam, legit],
-                        backgroundColor: ['rgba(239,68,68,0.8)', 'rgba(34,197,94,0.8)'],
-                        borderColor: ['#ef4444', '#22c55e'],
-                        borderWidth: 2,
-                        hoverOffset: 6,
+                        backgroundColor: ['rgba(239,68,68,0.75)', 'rgba(34,197,94,0.75)'],
+                        borderColor: ['#ef4444', '#22c55e'], borderWidth: 2, hoverOffset: 6
                     }],
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: c.text, font: { ...c.font, size: 12 }, padding: 16 },
-                        },
-                    },
+                    responsive: true, maintainAspectRatio: false, cutout: '62%',
+                    plugins: { legend: { position: 'bottom', labels: { color: c.text, font: { ...c.font, size: 12 }, padding: 16 } } }
                 },
             });
         }
 
-        function renderKeywordsChart(keywords) {
-            const ctx = document.getElementById('keywordsChart').getContext('2d');
-            if (keywordsChart) keywordsChart.destroy();
-            if (!keywords || keywords.length === 0) return;
-            const c = chartColors();
-
-            keywordsChart = new Chart(ctx, {
+        function renderKW(kws) {
+            const ctx = document.getElementById('kwChart');
+            if (kwChart) kwChart.destroy();
+            if (!kws || !kws.length) return;
+            const c = cConf();
+            kwChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: keywords.map(k => k.word),
-                    datasets: [{
-                        data: keywords.map(k => k.count),
-                        backgroundColor: 'rgba(139, 92, 246, 0.5)',
-                        borderColor: '#8b5cf6',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                    }],
+                    labels: kws.map(k => k.word), datasets: [{
+                        data: kws.map(k => k.count),
+                        backgroundColor: 'rgba(139,92,246,0.45)', borderColor: '#8b5cf6', borderWidth: 1, borderRadius: 4
+                    }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { ticks: { color: c.text, font: c.font }, grid: { color: c.grid } },
-                        y: { ticks: { color: '#c4b5fd', font: { ...c.font, size: 11 } }, grid: { display: false } },
-                    },
+                        y: { ticks: { color: '#c4b5fd', font: { ...c.font, size: 11 } }, grid: { display: false } }
+                    }
                 },
             });
         }
 
-        function renderConfidenceChart(confidences) {
-            const ctx = document.getElementById('confidenceChart').getContext('2d');
-            if (confidenceChart) confidenceChart.destroy();
-            if (!confidences || confidences.length === 0) return;
-            const c = chartColors();
-
+        function renderConf(confs) {
+            const ctx = document.getElementById('confChart');
+            if (confChart) confChart.destroy();
+            if (!confs || !confs.length) return;
+            const c = cConf();
             const bins = Array(20).fill(0);
-            confidences.forEach(v => { bins[Math.min(Math.floor(v * 20), 19)]++; });
+            confs.forEach(v => bins[Math.min(Math.floor(v * 20), 19)]++);
             const labels = bins.map((_, i) => `${i * 5}-${(i + 1) * 5}%`);
-
-            confidenceChart = new Chart(ctx, {
+            confChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels,
-                    datasets: [{
+                    labels, datasets: [{
                         data: bins,
-                        backgroundColor: bins.map((_, i) => i >= 10 ? 'rgba(239,68,68,0.5)' : 'rgba(34,197,94,0.5)'),
-                        borderColor: bins.map((_, i) => i >= 10 ? '#ef4444' : '#22c55e'),
-                        borderWidth: 1,
-                        borderRadius: 3,
-                    }],
+                        backgroundColor: bins.map((_, i) => i >= 10 ? 'rgba(239,68,68,0.45)' : 'rgba(34,197,94,0.45)'),
+                        borderColor: bins.map((_, i) => i >= 10 ? '#ef4444' : '#22c55e'), borderWidth: 1, borderRadius: 3
+                    }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { ticks: { color: c.text, font: { ...c.font, size: 9 }, maxRotation: 45 }, grid: { color: c.grid } },
-                        y: { ticks: { color: c.text, font: c.font }, grid: { color: c.grid } },
-                    },
+                        y: { ticks: { color: c.text, font: c.font }, grid: { color: c.grid } }
+                    }
                 },
             });
         }
 
+        function renderActivity(items) {
+            const el = document.getElementById('activityList');
+            if (!items.length) { el.innerHTML = '<div class="empty" style="padding:24px"><p>No activity yet</p></div>'; return; }
+            el.innerHTML = items.map(a => {
+                const isSpam = a.is_spam;
+                const prob = Math.round(a.spam_probability * 100);
+                const status = a.is_hidden ? '🔴 Hidden' : (isSpam ? '🟡 Flagged' : '🟢 Safe');
+                const text = a.text.length > 60 ? a.text.slice(0, 60) + '...' : a.text;
+                return `<div class="activity-item">
+            <span class="activity-dot ${isSpam ? 'dot-spam' : 'dot-safe'}"></span>
+            <span class="activity-text"><strong>${a.author || 'User'}</strong>: ${escapeHtml(text)}</span>
+            <span class="activity-prob" style="color:${isSpam ? 'var(--red)' : 'var(--green)'}">${prob}% ${status}</span>
+        </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
         loadThreshold();
-        loadDashboard();
-        setInterval(loadDashboard, 10000);
+        loadDash();
+        setInterval(loadDash, 8000);
     </script>
 </body>
 

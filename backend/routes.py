@@ -1,6 +1,6 @@
 """
 FastAPI route definitions for the social media platform.
-Handles posts, comments, moderation, and analytics.
+Handles posts, comments, moderation, likes, and analytics.
 """
 
 import os
@@ -47,7 +47,6 @@ async def create_post(
     caption: str = Form(""),
     author: str = Form("Anonymous"),
 ):
-    # Save uploaded image
     ext = os.path.splitext(image.filename)[1] or ".jpg"
     filename = f"{uuid.uuid4().hex}{ext}"
     filepath = os.path.join(UPLOAD_DIR, filename)
@@ -59,6 +58,38 @@ async def create_post(
     image_url = f"/static/uploads/{filename}"
     post = db.create_post(image_url=image_url, caption=caption, author=author)
     return {"post": post}
+
+
+@router.delete("/posts/{post_id}")
+def delete_post(post_id: int):
+    success = db.delete_post(post_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"deleted": True}
+
+
+@router.post("/posts/{post_id}/like")
+def like_post(post_id: int):
+    post = db.like_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"likes": post["likes"]}
+
+
+@router.post("/posts/{post_id}/unlike")
+def unlike_post(post_id: int):
+    post = db.unlike_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"likes": post["likes"]}
+
+
+@router.post("/posts/{post_id}/save")
+def save_post(post_id: int):
+    post = db.save_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"saved": bool(post["saved"])}
 
 
 # ─── Comments ─────────────────────────────────────────────────────────────────
@@ -80,7 +111,6 @@ def add_comment(post_id: int, body: CommentRequest):
     if not body.text.strip():
         raise HTTPException(status_code=400, detail="Comment text is required")
 
-    # AI moderation
     result = predict_spam(body.text)
 
     comment = db.create_comment(
@@ -100,6 +130,7 @@ def add_comment(post_id: int, body: CommentRequest):
             "confidence": result["confidence"],
             "spam_probability": result["spam_probability"],
             "action": "hidden" if result["should_hide"] else "approved",
+            "nlp_features": result.get("nlp_features", {}),
         },
     }
 
@@ -110,6 +141,21 @@ def get_hidden(post_id: int):
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return {"comments": db.get_hidden_comments(post_id)}
+
+
+@router.delete("/comments/{comment_id}")
+def delete_comment(comment_id: int):
+    if not db.delete_comment(comment_id):
+        raise HTTPException(status_code=404, detail="Comment not found")
+    return {"deleted": True}
+
+
+@router.post("/comments/{comment_id}/like")
+def like_comment(comment_id: int):
+    comment = db.like_comment(comment_id)
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    return {"likes": comment["likes"]}
 
 
 # ─── Moderation Overrides ────────────────────────────────────────────────────
@@ -136,7 +182,6 @@ def hide(comment_id: int):
 def analytics():
     data = db.get_analytics()
 
-    # Extract top spam keywords
     keywords = []
     for text in data["spam_texts"]:
         cleaned = preprocess_text(text)
@@ -149,9 +194,13 @@ def analytics():
         "spam": data["spam"],
         "legit": data["legit"],
         "hidden": data["hidden"],
+        "approved_spam": data["approved_spam"],
+        "total_posts": data["total_posts"],
+        "total_likes": data["total_likes"],
         "spam_percentage": data["spam_percentage"],
         "confidences": data["confidences"],
         "top_keywords": [{"word": w, "count": c} for w, c in keyword_counts],
+        "recent_activity": data["recent_activity"],
     }
 
 

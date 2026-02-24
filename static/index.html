@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShieldPost — AI Social Platform</title>
-    <meta name="description" content="AI-powered social media platform with real-time spam moderation">
+    <meta name="description" content="AI-powered social media platform with real-time NLP spam moderation">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <link rel="stylesheet" href="/static/styles.css">
@@ -13,88 +13,77 @@
 
 <body>
 
-    <div class="app-layout">
+    <div class="app">
 
-        <!-- ── Sidebar ────────────────────────────────────────── -->
+        <!-- ═══ Sidebar ═══════════════════════════════════════════ -->
         <aside class="sidebar">
-            <a href="/" class="sidebar-brand">
-                <span class="brand-icon">🛡️</span>
-                <span class="brand-text">ShieldPost</span>
+            <a href="/" class="brand">
+                <span class="brand-logo">🛡️</span>
+                <span class="brand-name">ShieldPost</span>
             </a>
-
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item active">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-label">Feed</span>
+            <nav class="nav">
+                <a href="/" class="nav-link active">
+                    <span class="icon">🏠</span><span class="label">Feed</span>
                 </a>
-                <a href="/dashboard" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">Dashboard</span>
+                <a href="/dashboard" class="nav-link">
+                    <span class="icon">📊</span><span class="label">Analytics</span>
                 </a>
-                <a href="#" class="nav-item" onclick="document.getElementById('postImage').click(); return false;">
-                    <span class="nav-icon">➕</span>
-                    <span class="nav-label">Create</span>
+                <a href="#" class="nav-link" id="navCreate">
+                    <span class="icon">➕</span><span class="label">Create</span>
                 </a>
-                <a href="/dashboard" class="nav-item">
-                    <span class="nav-icon">🔔</span>
-                    <span class="nav-label">Activity</span>
-                    <span class="nav-badge" id="spamBadge" style="display:none">0</span>
+                <a href="/dashboard" class="nav-link">
+                    <span class="icon">🔔</span><span class="label">Activity</span>
+                    <span class="badge" id="spamBadge" style="display:none">0</span>
                 </a>
-                <a href="/dashboard" class="nav-item">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Settings</span>
+                <a href="/dashboard" class="nav-link">
+                    <span class="icon">⚙️</span><span class="label">Settings</span>
                 </a>
             </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-avatar">M</div>
-                <div class="user-info">
-                    <div class="user-name">Moderator</div>
-                    <div class="user-role">AI Admin</div>
+            <div class="profile-card">
+                <div class="profile-avatar">M</div>
+                <div>
+                    <div class="profile-name">Moderator</div>
+                    <div class="profile-role">AI Admin</div>
                 </div>
             </div>
         </aside>
 
-        <!-- ── Main Content ───────────────────────────────────── -->
-        <main class="main-content">
-            <div class="feed-layout">
+        <!-- ═══ Main ══════════════════════════════════════════════ -->
+        <main class="main">
+            <div class="feed-container">
 
-                <!-- Page Header -->
-                <div class="page-header">
-                    <h1>Feed</h1>
-                    <p>Share moments, powered by AI moderation</p>
+                <div class="page-title">
+                    <h1>🏠 Feed</h1>
+                    <p>Share moments. AI keeps your community clean.</p>
                 </div>
 
                 <!-- Composer -->
                 <div class="composer" id="composer">
-                    <div class="composer-header">
-                        <div class="avatar">✦</div>
-                        <input type="text" id="postAuthor" placeholder="Your name" autocomplete="off" value="Anonymous">
+                    <div class="composer-top">
+                        <div class="av">✦</div>
+                        <input type="text" id="postAuthor" placeholder="Your name" value="Anonymous" autocomplete="off">
                     </div>
-                    <div class="composer-body">
+                    <div class="composer-caption">
                         <textarea id="postCaption" placeholder="What's on your mind?" rows="1"
-                            oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';"></textarea>
+                            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
                     </div>
-                    <div class="composer-preview">
-                        <img id="imagePreview" alt="Preview">
+                    <div class="composer-img-preview">
+                        <img id="imgPreview" alt="Preview">
                     </div>
-                    <div class="composer-footer">
-                        <div class="composer-actions">
-                            <label class="composer-action-btn" title="Add photo">
-                                📷
-                                <input type="file" id="postImage" accept="image/*">
-                            </label>
-                            <span class="file-name-display" id="fileName"></span>
+                    <div class="composer-bar">
+                        <div class="composer-tools">
+                            <label class="tool-btn" title="Add photo">📷<input type="file" id="postImage"
+                                    accept="image/*"></label>
+                            <button class="tool-btn" title="Emoji" onclick="insertEmoji()">😊</button>
+                            <span class="file-label" id="fileName"></span>
                         </div>
-                        <button class="btn btn-primary" id="postBtn" onclick="createPost()">
-                            Post
-                        </button>
+                        <button class="btn btn-primary" id="postBtn" onclick="createPost()">Post</button>
                     </div>
                 </div>
 
-                <!-- Posts Feed -->
+                <!-- Posts -->
                 <div id="postsContainer">
-                    <div class="empty-state" id="emptyState">
+                    <div class="empty" id="emptyState">
                         <div class="empty-icon">📸</div>
                         <h3>No posts yet</h3>
                         <p>Upload an image and share it with the world.</p>
@@ -103,20 +92,36 @@
 
             </div>
         </main>
-
     </div>
 
-    <!-- Mobile Bottom Nav -->
-    <nav class="mobile-nav">
+    <!-- Mobile Nav -->
+    <nav class="mob-nav">
         <a href="/" class="active">🏠</a>
         <a href="/dashboard">📊</a>
-        <a href="#" onclick="document.getElementById('postImage').click(); return false;">➕</a>
+        <a href="#" onclick="document.getElementById('postImage').click();return false">➕</a>
         <a href="/dashboard">🔔</a>
         <a href="/dashboard">⚙️</a>
     </nav>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- Image Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="Full image">
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <h4 id="confirmTitle">Delete Post?</h4>
+            <p id="confirmMsg">This action cannot be undone.</p>
+            <div class="confirm-btns">
+                <button class="btn btn-outline btn-sm" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-danger btn-sm" id="confirmAction">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toasts" id="toasts"></div>
 
     <script src="/static/app.js"></script>
 </body>
